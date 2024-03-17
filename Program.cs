@@ -1,4 +1,6 @@
 ﻿using ReflectionConsoleApp.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ReflectionConsoleApp
 {
@@ -14,6 +16,11 @@ namespace ReflectionConsoleApp
             var methods = typeF.GetMethods();
             var events = typeF.GetEvents();
 
+            var result = MySerializer.Serialize(classF);
+            Console.WriteLine(result);
+
+            Console.WriteLine("Стандартный json");
+            Console.WriteLine(JsonSerializer.Serialize(classF));
         }
     }
 }
