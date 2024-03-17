@@ -11,6 +11,32 @@ namespace ReflectionConsoleApp
         {
             // пункты 1 - 8
             GetStringFromClassF();
+            GetClassFromString();
+            //GetClassFromIni();
+            //GetClassFromCSV();
+        }
+        /// <summary>
+        /// загрузка данных из строки в экземпляр любого класса
+        /// </summary>
+        private static void GetClassFromString()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// загрузка данных из csv-файла в экземпляр любого класса
+        /// </summary>
+        private static void GetClassFromCSV()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// загрузка данных из ini-файла в экземпляр любого класса
+        /// </summary>
+        private static void GetClassFromIni()
+        {
+            throw new NotImplementedException();
         }
 
         private static void GetStringFromClassF()
