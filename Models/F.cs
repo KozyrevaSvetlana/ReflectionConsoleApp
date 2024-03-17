@@ -8,6 +8,7 @@
         public int i3 { get; set; }
         public int i4 { get; set; }
         public int i5 { get; set; }
+        // доп. поля для других типов данных
         public bool IsTest { get; set; }
         public DateTime DateCreate { get; set; }
 
