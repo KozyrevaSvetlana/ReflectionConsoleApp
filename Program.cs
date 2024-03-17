@@ -9,6 +9,11 @@ namespace ReflectionConsoleApp
         private static int count = 10_000;
         static void Main(string[] args)
         {
+            GetStringFromClassF();
+        }
+
+        private static void GetStringFromClassF()
+        {
             var classF = new F();
 
             var mytimer = new Stopwatch();
