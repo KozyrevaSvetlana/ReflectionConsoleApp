@@ -60,7 +60,9 @@ namespace ReflectionConsoleApp.Models
                     builder.Append($"\"{property.Name}\":\"{((DateTime)property.GetValue(_object)).ToString("o")}\",");
                     break;
                 default:
+                    builder.Append("[");
                     property.Serialize(_object, builder);
+                    builder.Append("],");
                     break;
             }
             return builder;
