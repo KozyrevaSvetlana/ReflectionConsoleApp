@@ -11,10 +11,11 @@ namespace ReflectionConsoleApp.Models
             {typeof(string), 1},
             {typeof(char), 2},
             {typeof(bool), 3},
+            {typeof(DateTime), 4},
         };
         public static string Serialize<T>(T _object)
         {
-            if(_object == null)
+            if (_object == null)
                 throw new ArgumentNullException(nameof(_object));
 
             var result = new StringBuilder();
@@ -38,6 +39,9 @@ namespace ReflectionConsoleApp.Models
 
         private static StringBuilder Serialize(this PropertyInfo property, object _object, StringBuilder builder)
         {
+            if (property.PropertyType == null)
+                return builder;
+
             switch (typeDict[property.PropertyType])
             {
                 case 0:
@@ -46,6 +50,9 @@ namespace ReflectionConsoleApp.Models
                     builder.Append($"\"{property.Name}\":{property.GetValue(_object)},");
                     break;
                 case 3:
+                    builder.Append($"\"{property.Name}\":{(int)property.GetValue(_object)!},");
+                    break;
+                case 4:
                     break;
                 default:
                     property.Serialize(_object, builder);
