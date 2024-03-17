@@ -8,6 +8,8 @@
         public int i3 { get; set; }
         public int i4 { get; set; }
         public int i5 { get; set; }
+        public bool IsTest { get; set; }
+        public DateTime DateCreate { get; set; }
 
         public F()
         {
@@ -16,6 +18,8 @@
             i3 = 3;
             i4 = 4;
             i5 = 5;
+            IsTest = true;
+            DateCreate = DateTime.Now;
         }
     }
 }

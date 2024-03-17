@@ -11,7 +11,8 @@ namespace ReflectionConsoleApp.Models
             {typeof(string), 1},
             {typeof(char), 2},
             {typeof(bool), 3},
-            {typeof(DateTime), 4},
+            {typeof(Enum), 4},
+            {typeof(DateTime), 5},
         };
         public static string Serialize<T>(T _object)
         {
@@ -50,9 +51,13 @@ namespace ReflectionConsoleApp.Models
                     builder.Append($"\"{property.Name}\":{property.GetValue(_object)},");
                     break;
                 case 3:
-                    builder.Append($"\"{property.Name}\":{(int)property.GetValue(_object)!},");
+                    builder.Append($"\"{property.Name}\":{(bool)property.GetValue(_object)},");
                     break;
                 case 4:
+                    builder.Append($"\"{property.Name}\":{(int)property.GetValue(_object)!},");
+                    break;
+                case 5:
+                    builder.Append($"\"{property.Name}\":\"{((DateTime)property.GetValue(_object)).ToString("o")}\",");
                     break;
                 default:
                     property.Serialize(_object, builder);
