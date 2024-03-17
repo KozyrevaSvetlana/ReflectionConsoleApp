@@ -1,47 +1,44 @@
 ﻿using ReflectionConsoleApp.Models;
+using System.Diagnostics;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ReflectionConsoleApp
 {
     internal class Program
     {
+        private static int count = 10_000;
         static void Main(string[] args)
         {
             var classF = new F();
-            var typeF = typeof(F);
-            var fields = typeF.GetFields();
-            var properties = typeF.GetProperties();
-            var constructors = typeF.GetConstructors();
-            var methods = typeF.GetMethods();
-            var events = typeF.GetEvents();
 
-            var result = MySerializer.Serialize(classF);
-            Console.WriteLine(result);
+            var mytimer = new Stopwatch();
+            mytimer.Start();
+            for (int i = 0; i < count; i++)
+            {
+                MySerializer.Serialize(classF);
+            }
+            mytimer.Stop();
+            TimeSpan timeTaken = mytimer.Elapsed;
+            Console.WriteLine("Мой метод занял: " + timeTaken.ToString(@"m\:ss\.fff"));
+            Console.WriteLine();
 
-            Console.WriteLine("Стандартный json");
-            Console.WriteLine(JsonSerializer.Serialize(classF));
+            var timer = new Stopwatch();
+            timer.Start();
+            for (int i = 0; i < count; i++)
+            {
+                JsonSerializer.Serialize(classF);
+            }
+            timer.Stop();
+            TimeSpan timeJsonTaken = timer.Elapsed;
+            Console.WriteLine("JsonSerializer занял: " + timeJsonTaken.ToString(@"m\:ss\.fff"));
+            Console.WriteLine();
+            var result = (timeTaken - timer.Elapsed).ToString(@"m\:ss\.fff");
+            Console.WriteLine($"Разница - {result}");
         }
     }
 }
 
-//1.Написать сериализацию свойств или полей класса в строку
-
-//2. Проверить на классе: class F 
-
-//3.Замерить время до и после вызова функции (для большей точности можно сериализацию сделать в цикле 100-100000 раз)
-
-//4. Вывести в консоль полученную строку и разницу времен
-
-//5. Отправить в чат полученное время с указанием среды разработки и количества итераций
-
-//6. Замерить время еще раз и вывести в консоль сколько потребовалось времени на вывод текста в консоль
-
-//7. Провести сериализацию с помощью каких-нибудь стандартных механизмов (например в JSON)
-
-//8. И тоже посчитать время и прислать результат сравнения
-
-//9. Написать десериализацию/загрузку данных из строки (ini/csv-файла) в экземпляр любого класса
+//9.Написать десериализацию / загрузку данных из строки (ini/csv-файла) в экземпляр любого класса
 
 //10. Замерить время на десериализацию
 
