@@ -7,6 +7,7 @@
         public string Name { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreateDate { get; set; }
+        public MyClass(){}
         public MyClass(string name)
         {
             Id = id;

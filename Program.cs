@@ -1,6 +1,9 @@
 ﻿using ReflectionConsoleApp.Models;
 using System.Diagnostics;
+using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
 
 namespace ReflectionConsoleApp
 {
@@ -9,17 +12,20 @@ namespace ReflectionConsoleApp
         private static int count = 10_000;
         private static string path = "../../../";
         private static string fileName = "MyClassExample.txt";
+        private static JsonSerializerOptions optionsCyrillic = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
+            WriteIndented = true,
+            AllowTrailingCommas = true,
+            PropertyNameCaseInsensitive = true
+        };
         static void Main(string[] args)
         {
-            // пункты 1 - 8
-            GetStringFromClassF();
             SaveStringFromClassF();
             var data = LoadStringFromFile();
-            if(string.IsNullOrEmpty(data))
+            if (string.IsNullOrEmpty(data))
                 throw new ArgumentNullException("Нет данных из файла");
-            GetClassFromString();
-            //GetClassFromIni();
-            //GetClassFromCSV();
+            GetClassFromString(data);
         }
 
 
@@ -29,9 +35,11 @@ namespace ReflectionConsoleApp
         private static void SaveStringFromClassF()
         {
             var myClass = new MyClass("Светлана");
-            var data = JsonSerializer.Serialize(myClass);
-
-            using (StreamWriter outputFile = new StreamWriter(Path.Combine(path, fileName), true))
+            var data = MySerializer.Serialize(myClass);
+            Console.WriteLine(data);
+            var dataJson = JsonSerializer.Serialize(myClass, optionsCyrillic);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            using (StreamWriter outputFile = new StreamWriter(Path.Combine(path, fileName), false, Encoding.GetEncoding("windows-1251")))
             {
                 outputFile.WriteLine(data);
             }
@@ -42,101 +50,52 @@ namespace ReflectionConsoleApp
         /// </summary>
         private static string? LoadStringFromFile()
         {
-            String line = string.Empty;
-            using (StreamReader sr = new StreamReader($"{path}\\{fileName}"))
+            var result = new StringBuilder();
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            using (StreamReader sr = new StreamReader($"{path}\\{fileName}", Encoding.GetEncoding("windows-1251")))
             {
                 while (!sr.EndOfStream)
                 {
-                    line = sr.ReadLine();
-                    Console.WriteLine(line);
+                    result.Append(sr.ReadLine());
                 }
             }
-            return line;
+            return result.ToString();
         }
 
         /// <summary>
         /// загрузка данных из строки в экземпляр любого класса
         /// </summary>
-        private static void GetClassFromString()
+        private static void GetClassFromString(string data)
         {
-            var classF = new F();
             var mytimer = new Stopwatch();
+            mytimer.Start();
             Console.WriteLine("Сериализуемый класс: class F { int i1, i2, i3, i4, i5; }");
             Console.WriteLine($"количество замеров: {count} итераций");
             Console.WriteLine("мой рефлекшен:");
-            mytimer.Start();
+            var myClass = MySerializer.DeserializeObject<MyClass>(data);
+            Console.WriteLine(myClass);
             for (int i = 0; i < count; i++)
             {
-
+                myClass = MySerializer.DeserializeObject<MyClass>(data);
             }
             mytimer.Stop();
             TimeSpan timeTaken = mytimer.Elapsed;
             Console.WriteLine($"Время на сериализацию = {timeTaken.Milliseconds} мс");
-            Console.WriteLine("Время на десериализацию = {} мс");
+
             Console.WriteLine();
 
             Console.WriteLine($"стандартный механизм (NewtonsoftJson):");
             var timer = new Stopwatch();
             timer.Start();
+            var myClassDefault = JsonSerializer.Deserialize<MyClass>(data, optionsCyrillic);
             for (int i = 0; i < count; i++)
             {
-
+                myClassDefault = JsonSerializer.Deserialize<MyClass>(data, optionsCyrillic);
             }
             timer.Stop();
             TimeSpan timeJsonTaken = timer.Elapsed;
-            Console.WriteLine("Время на сериализацию = {} мс");
-            Console.WriteLine("Время на десериализацию = {} мс");
-        }
-
-        /// <summary>
-        /// загрузка данных из csv-файла в экземпляр любого класса
-        /// </summary>
-        private static void GetClassFromCSV()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// загрузка данных из ini-файла в экземпляр любого класса
-        /// </summary>
-        private static void GetClassFromIni()
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void GetStringFromClassF()
-        {
-            var classF = new F();
-
-            var mytimer = new Stopwatch();
-            mytimer.Start();
-            for (int i = 0; i < count; i++)
-            {
-                MySerializer.Serialize(classF);
-            }
-            mytimer.Stop();
-            TimeSpan timeTaken = mytimer.Elapsed;
-            Console.WriteLine("Мой метод занял: " + timeTaken.ToString(@"m\:ss\.fff"));
-            Console.WriteLine();
-
-            var timer = new Stopwatch();
-            timer.Start();
-            for (int i = 0; i < count; i++)
-            {
-                JsonSerializer.Serialize(classF);
-            }
-            timer.Stop();
-            TimeSpan timeJsonTaken = timer.Elapsed;
-            Console.WriteLine("JsonSerializer занял: " + timeJsonTaken.ToString(@"m\:ss\.fff"));
-            Console.WriteLine();
-            var result = (timeTaken - timer.Elapsed).ToString(@"m\:ss\.fff");
-            Console.WriteLine($"Разница - {result}");
+            Console.WriteLine($"Время на сериализацию = {timeJsonTaken.Milliseconds} мс");
+            Console.WriteLine($"Разница = {timeTaken.Milliseconds - timeJsonTaken.Milliseconds}");
         }
     }
 }
-
-//9.Написать десериализацию / загрузку данных из строки (ini/csv-файла) в экземпляр любого класса
-
-//10. Замерить время на десериализацию
-
-//11. Общий результат прислать в чат с преподавателем в системе в таком виде:
