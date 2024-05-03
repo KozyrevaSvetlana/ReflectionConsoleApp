@@ -21,7 +21,9 @@ namespace ReflectionConsoleApp
         };
         static void Main(string[] args)
         {
-            SaveStringFromClassF();
+            var myClass = new MyClass("Светлана");
+            GetStringFromClass(myClass);
+            SaveStringFromClassF(myClass);
             var data = LoadStringFromFile();
             if (string.IsNullOrEmpty(data))
                 throw new ArgumentNullException("Нет данных из файла");
@@ -32,9 +34,8 @@ namespace ReflectionConsoleApp
         /// <summary>
         /// Сохранить класс MyClass в файле проекта
         /// </summary>
-        private static void SaveStringFromClassF()
+        private static void SaveStringFromClassF(MyClass myClass)
         {
-            var myClass = new MyClass("Светлана");
             var data = MySerializer.Serialize(myClass);
             Console.WriteLine(data);
             var dataJson = JsonSerializer.Serialize(myClass, optionsCyrillic);
@@ -87,10 +88,41 @@ namespace ReflectionConsoleApp
             Console.WriteLine($"стандартный механизм (NewtonsoftJson):");
             var timer = new Stopwatch();
             timer.Start();
-            var myClassDefault = JsonSerializer.Deserialize<MyClass>(data, optionsCyrillic);
             for (int i = 0; i < count; i++)
             {
-                myClassDefault = JsonSerializer.Deserialize<MyClass>(data, optionsCyrillic);
+                JsonSerializer.Deserialize<MyClass>(data, optionsCyrillic);
+            }
+            timer.Stop();
+            TimeSpan timeJsonTaken = timer.Elapsed;
+            Console.WriteLine($"Время на сериализацию = {timeJsonTaken.Milliseconds} мс");
+            Console.WriteLine($"Разница = {timeTaken.Milliseconds - timeJsonTaken.Milliseconds}");
+        }
+
+        /// <summary>
+        /// загрузка данных из экземпляра класса в строку
+        /// </summary>
+        private static void GetStringFromClass<T>(T data)
+        {
+            var mytimer = new Stopwatch();
+            mytimer.Start();
+            Console.WriteLine($"количество замеров: {count} итераций");
+            Console.WriteLine("мой рефлекшен:");
+            for (int i = 0; i < count; i++)
+            {
+                MySerializer.Serialize(data);
+            }
+            mytimer.Stop();
+            TimeSpan timeTaken = mytimer.Elapsed;
+            Console.WriteLine($"Время на сериализацию = {timeTaken.Milliseconds} мс");
+
+            Console.WriteLine();
+
+            Console.WriteLine($"стандартный механизм (NewtonsoftJson):");
+            var timer = new Stopwatch();
+            timer.Start();
+            for (int i = 0; i < count; i++)
+            {
+                JsonSerializer.Serialize(data, optionsCyrillic);
             }
             timer.Stop();
             TimeSpan timeJsonTaken = timer.Elapsed;
