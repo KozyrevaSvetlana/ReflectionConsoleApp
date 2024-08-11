@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Dynamic;
+using System.Reflection;
 using System.Text;
 
 namespace ReflectionConsoleApp.Models
@@ -33,9 +34,51 @@ namespace ReflectionConsoleApp.Models
             return result.ToString();
         }
 
-        public static T? DeserializeObject<T>(string value)
+        public static T? DeserializeObject<T>(string input) where T : new()
         {
-            return (T?)Activator.CreateInstance(typeof(T));
+            var model = new T();
+            string[] parts = input.Split(',');
+
+            var properties = typeof(T).GetProperties();
+
+            for (int i = 0; i < properties.Length && i < parts.Length; i++)
+            {
+                var value = parts[i].Trim();
+                var property = properties[i];
+
+                if (property.CanWrite)
+                {
+                    object? convertedValue = null;
+                    switch (property.PropertyType.Name)
+                    { 
+                        case "Boolean":
+                            convertedValue = ConvertToBoolean(value);
+                            break;
+                        case "DateTime":
+                            if (DateTime.TryParse(value, out DateTime parsedDate))
+                                convertedValue = parsedDate;
+                            break;
+                        default:
+                            convertedValue = Convert.ChangeType(value, property.PropertyType);
+                            break;
+                    }
+                    property.SetValue(model, convertedValue);
+                }
+            }
+            return model;
+        }
+
+        private static bool? ConvertToBoolean(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
+                return true;
+            else if (string.Equals(value, "false", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return null;
         }
 
         private static StringBuilder Serialize(this PropertyInfo property, object _object, StringBuilder builder)
